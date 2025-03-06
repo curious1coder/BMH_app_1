@@ -17,7 +17,7 @@ st.write("Enter patient details to predict **Duration of Stay** and **Type of Ad
 # Input Fields
 age = st.number_input("Age", min_value=0, max_value=120, step=1)
 gender = st.selectbox("Gender", ["M", "F"])
-rural = st.selectbox("Rural Area", ["R", "U"])
+rural = st.selectbox("Rural Area", ["R","U"])
 outcome = st.selectbox("Outcome", ["DISCHARGE", "EXPIRY", "DAMA"])
 smoking = st.selectbox("Smoking", [1, 0])
 alcohol = st.selectbox("Alcohol", [1, 0])
@@ -41,7 +41,7 @@ chb = st.selectbox("CHB", [1, 0])
 sss = st.selectbox("SSS", [1, 0])
 aki = st.selectbox("AKI", [1, 0])
 cva_bleed = st.selectbox("CVA Bleed", [1, 0])
-cva_infract = st.selectbox("CVA Infract", [1, 0])
+cva_infract = st.selectbox("CVA infract", [1, 0])
 af = st.selectbox("AF", [1, 0])
 vt = st.selectbox("VT", [1, 0])
 psvt = st.selectbox("PSVT", [1, 0])
@@ -55,7 +55,6 @@ cardiogenic_shock = st.selectbox("Cardiogenic Shock", [1, 0])
 shock = st.selectbox("Shock", [1, 0])
 pulmonary_embolism = st.selectbox("Pulmonary Embolism", [1, 0])
 chest_infection = st.selectbox("Chest Infection", [1, 0])
-
 duration_of_intensive_unit_stay = st.number_input("Duration of Intensive Unit Stay")
 
 # Numerical Inputs
@@ -70,32 +69,33 @@ ef = st.number_input("Ejection Fraction (EF)")
 # Convert Inputs into DataFrame
 input_data = pd.DataFrame([[age, gender, rural, outcome, smoking, alcohol, dm, htn, cad, prior_cmp, ckd, 
                             raised_cardiac_enzymes, severe_anaemia, anaemia, stable_angina, stemi, atypical_chest_pain, 
-                            heart_failure, hfref, hfnef, acs, valvular, chb, sss, aki, cva_bleed, cva_infract, af, vt, psvt, congenital, 
+                            heart_failure, hfref, hfnef, acs, valvular, chb, sss, aki, cva_bleed,cva_infract, af, vt, psvt, congenital, 
                             uti, neuro_cardiogenic_syncope, orthostatic, infective_endocarditis, dvt, cardiogenic_shock, shock, 
                             pulmonary_embolism, chest_infection, duration_of_intensive_unit_stay, hb, tlc, platelets, glucose, urea, creatinine, ef]], 
-                          columns=["AGE", "GENDER", "RURAL", "OUTCOME", "SMOKING ", "ALCOHOL", "DM", "HTN", "CAD", "PRIOR CMP", "CKD", 
+                          columns=["AGE", "GENDER", "RURAL", "OUTCOME", "SMOKING", "ALCOHOL", "DM", "HTN", "CAD", "PRIOR CMP", "CKD", 
                                    "RAISED CARDIAC ENZYMES", "SEVERE ANAEMIA", "ANAEMIA", "STABLE ANGINA", "STEMI", "ATYPICAL CHEST PAIN", 
-                                   "HEART FAILURE", "HFREF", "HFNEF", "ACS", "VALVULAR", "CHB", "SSS", "AKI", "CVA BLEED", "CVA INFRACT", "AF", "VT", "PSVT", "CONGENITAL", 
+                                   "HEART FAILURE", "HFREF", "HFNEF", "ACS", "VALVULAR", "CHB", "SSS", "AKI", "CVA BLEED","CVA INFRACT", "AF", "VT", "PSVT", "CONGENITAL", 
                                    "UTI", "NEURO CARDIOGENIC SYNCOPE", "ORTHOSTATIC", "INFECTIVE ENDOCARDITIS", "DVT", "CARDIOGENIC SHOCK", "SHOCK", 
-                                   "PULMONARY EMBOLISM", "CHEST INFECTION", "duration of intensive unit stay", "HB", "TLC", "PLATELETS", "GLUCOSE", "UREA", "CREATININE", "EF"])
-
-
-input_data = pd.get_dummies(input_data, dtype=int)
-# Convert all numerical columns to numeric type
-numerical_features = input_data.columns
-input_data[numerical_features] = input_data[numerical_features].apply(pd.to_numeric, errors='coerce')
+                                   "PULMONARY EMBOLISM", "CHEST INFECTION", "DURATION OF INTENSIVE UNIT STAY", "HB", "TLC", "PLATELETS", "GLUCOSE", "UREA", "CREATININE", "EF"])
 
 # One-Hot Encoding
-# input_data = pd.get_dummies(input_data, dtype=int)
-input_data = input_data.reindex(columns=encoder_columns, fill_value=0)  # Ensure column match
+input_data['RURAL_U'] = (input_data['RURAL'] == 'U').astype(int)
+input_data['RURAL_R'] = (input_data['RURAL'] == 'R').astype(int)
+input_data['GENDER_M'] = (input_data['GENDER'] == 'M').astype(int)
+input_data['GENDER_F'] = (input_data['GENDER'] == 'F').astype(int)
+input_data['OUTCOME_DISCHARGE'] = (input_data['OUTCOME'] == 'DISCHARGE').astype(int)
+input_data['OUTCOME_EXPIRY'] = (input_data['OUTCOME'] == 'EXPIRY').astype(int)
+input_data['OUTCOME_DAMA'] = (input_data['OUTCOME'] == 'DAMA').astype(int)
+input_data = input_data.drop(columns=['GENDER', 'OUTCOME'])
+input_data = input_data.reindex(columns=encoder_columns, fill_value=0)
 
 # Scale Numerical Features
-# input_data[numerical_features] = scaler.transform(input_data[numerical_features])
+numerical_features = scaler.feature_names_in_
+input_data[numerical_features] = scaler.transform(input_data[numerical_features])
 
 # Make Predictions
 duration_of_stay = regressor.predict(input_data)[0]
 type_of_admission = classifier.predict(input_data)[0]
-
 type_of_admission_label = "Emergency" if type_of_admission == 1 else "OPD"
 
 # Display Predictions
